@@ -27,3 +27,18 @@ Java home: /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.151-1.b12.el7_4.x86_64/jre
 Default locale: en_US, platform encoding: UTF-8
 OS name: "linux", version: "3.10.0-693.5.2.el7.x86_64", arch: "amd64", family: "unix"
 ```
+# 配置阿里云镜像
+```
+# mkdir -p /usr/local/mavenjar
+
+# vim /usr/local/maven/conf/settings.xml
+<localRepository>/usr/local/mavenjar</localRepository>
+<mirrors>
+  <mirror> 
+    <id>alimaven</id> 
+    <name>aliyun maven</name> 
+    <url>http://maven.aliyun.com/nexus/content/groups/public/</url> 
+    <mirrorOf>central</mirrorOf> 
+  </mirror> 
+</mirrors>
+```
