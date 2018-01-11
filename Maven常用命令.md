@@ -6,9 +6,7 @@ mvn clean package //默认打包类型jar
 
 mvn package -DskipTests //跳过测试
 
-mvn test -Dtest=Random*Test,AccountTest //执行指定的测试用例
-
-[一个*号匹配除路径分隔符外的0或者多个字符；两个**号用来匹配任意路径]
+mvn test -Dtest=Random*Test,AccountTest //执行指定的测试用例[一个*号匹配除路径分隔符外的0或者多个字符；两个**号用来匹配任意路径]
 
 mvn test -Dtest -DfailIfNoTests=false //告诉maven-surefire-plugin即使没有任何测试也不要报错
 
