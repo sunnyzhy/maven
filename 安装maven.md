@@ -1,44 +1,29 @@
-# 官网
-http://maven.apache.org/download.cgi
+# 安装 maven
 
-# 安装
-```
-# cd /usr/local
+[maven 官网](http://maven.apache.org/download.cgi 'maven 官网')
 
-# tar -zxvf apache-maven-3.5.2-bin.tar.gz
+## 安装
 
-# mv apache-maven-3.5.2 maven
-```
+1. 下载 ```Binary zip archive```
+2. 解压到任意目录并重命名，比如: ```D:\develop\maven```
+3. 配置环境变量:
+   1. 新建系统变量，名称: ```MAVEN_HOME; 值: ```D:\develop\maven```
+   2. 在 ```Path``` 里添加 ```%MAVEN_HOME%\bin```
+3. 执行 ```mvn -v```，如果出现版本信息即安装成功
 
-# 配置环境变量
-```
-# vim /etc/profile
-MAVEN_HOME=/usr/local/maven
-export MAVEN_HOME
-export PATH=${PATH}:${MAVEN_HOME}/bin
+## 配置阿里云镜像
 
-# source /etc/profile
+编辑 ```D:\develop\maven\conf\settings.xml```:
 
-# mvn -version
-Apache Maven 3.5.2 (138edd61fd100ec658bfa2d307c43b76940a5d7d; 2017-10-18T15:58:13+08:00)
-Maven home: /usr/local/maven
-Java version: 1.8.0_151, vendor: Oracle Corporation
-Java home: /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.151-1.b12.el7_4.x86_64/jre
-Default locale: en_US, platform encoding: UTF-8
-OS name: "linux", version: "3.10.0-693.5.2.el7.x86_64", arch: "amd64", family: "unix"
-```
-# 配置阿里云镜像
-```
-# mkdir -p /usr/local/mavenjar
+```xml
+  <localRepository>D:/repository-maven</localRepository>
 
-# vim /usr/local/maven/conf/settings.xml
-<localRepository>/usr/local/mavenjar</localRepository>
-<mirrors>
-  <mirror> 
-    <id>alimaven</id> 
-    <name>aliyun maven</name> 
-    <url>http://maven.aliyun.com/nexus/content/groups/public/</url> 
-    <mirrorOf>central</mirrorOf> 
-  </mirror> 
-</mirrors>
+  <mirrors>
+    <mirror>
+	  <id>aliyunmaven</id>
+	  <mirrorOf>*</mirrorOf>
+	  <name>阿里云公共仓库</name>
+	  <url>https://maven.aliyun.com/repository/public</url>
+	</mirror>
+  </mirrors>
 ```
