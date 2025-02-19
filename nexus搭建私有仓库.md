@@ -130,3 +130,28 @@ Deployment 设置选项有三个值：
 ## 发布本地 jar
 
 使用 maven 插件 deploy 发布到私有仓库。
+
+## 权限管理
+
+点击上方的配置按钮 ```Server administration and configuration``` 打开仓库管理界面。
+
+### 新建角色
+
+点击 ```Roles -> Create role -> Nexus role```，新建一个普通角色 ```nx-test```:
+
+1. 输入 ```Role ID``` 和 ```Role name```
+2. 在 ```Privileges``` 列表里选择:
+   - nx-repository-view-*-*-*
+   - nx-repository-view-*-*-add
+   - nx-repository-view-*-*-browse
+   - nx-repository-view-*-*-delete
+   - nx-repository-view-*-*-edit
+   - nx-repository-view-*-*-read
+
+### 新建用户
+
+点击 ```Users -> Create local user```，新建一个用户 ```test```:
+
+1. 输入用户名、密码
+2. ```Status``` 选择 ```Active```
+3. ```Roles``` 选择 ```nx-test```
