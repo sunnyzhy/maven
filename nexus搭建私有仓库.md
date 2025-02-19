@@ -27,15 +27,15 @@
 仓库的类型：
 
 - ```proxy```: 代理仓库，主要是代理公共的远程仓库，比如 aliyun 
-- ```group```: 仓库组，主要是将仓库汇总，将私有仓库和远程仓库汇总起来，然后对外提供一个地址。将 proxy 和 hosted 统一
-- ```hosted```: 私有仓库，主要是将本地 jar 作为共享资源。***注：发布本地 jar 到私有仓库，只能使用 ```hosted``` 的仓库。***
+- ```group```: 仓库组，主要是将仓库汇总，将私有仓库和远程仓库汇总起来，然后对外提供一个地址。将 proxy 和 hosted 统一。***注：下载私有仓库的 jar，一般使用 ```group``` 类型的仓库，并且一定不能是 ```hosted``` 类型**。***
+- ```hosted```: 私有仓库，主要是将本地 jar 作为共享资源。***注：发布本地 jar 到私有仓库，只能使用 ```hosted``` 类型的仓库。***
 
 默认的仓库：
 
-- ```maven-central```: maven 中央库，默认从 ```https://repo1.maven.org/maven2/``` 拉 取jar
+- ```maven-central```: maven 中央库，默认从 ```https://repo1.maven.org/maven2/``` 拉取jar，可以修改为阿里云的镜像源：```https://maven.aliyun.com/repository/public```
 - ```maven-releases```: 私有仓库，存放稳定的发布版本，即版本号不会频繁变动
 - ```maven-snapshots```: 私有仓库，存放快照版本，也就是存放未发布的不稳定版本，即版本号会频繁变动
-- ```maven-public```: 仓库分组，把上面三个仓库组合在一起对外提供服务，在本地 maven 的配置文件 settings.xml 中使用
+- ```maven-public```: 仓库分组，默认包含三个成员：```maven-releases```、```maven-snapshots```、```maven-central```，下载 jar 时，依次在这三个仓库里查找，直到找到为止；如果这三个仓库里都不存在，则抛出异常。**所以这三个仓库的排列顺序非常重要。**
 - ```nuget-hosted```: 本地存储，像官方仓库一样提供本地私有仓库的功能
    - hosted 有三种方式：Releases、Snapshot、Mixed
       - ```Releases```: 稳定的发布版本
@@ -55,7 +55,19 @@ Deployment 设置选项有三个值：
 1. 点击上方的配置按钮 ```Browse server contents```，点击左侧栏的 ```Browse```，比如点击列表里的 ```maven-releases``` 打开组件管理界面。
 2. 选择要删除的组件，也就是 jar 文件夹，点击右侧的 ```Delete folder```。
 
-## 配置 Maven
+## 在 hosts 文件里添加 nexus 映射
+
+```
+192.168.0.10  nexus
+```
+
+为了防止私有仓库的服务器地址发生变动，可以使用域名和地址映射。
+
+## 发布 jar 到私有仓库
+
+**```deploy``` 需要认证 ```nexus``` 的账号密码，所以必须配置 ```server```。**
+
+### 配置 Maven
 
 修改 ```./conf/settings.xml```：
 
@@ -75,15 +87,18 @@ Deployment 设置选项有三个值：
 </servers>
 ```
 
-## 配置 pom.xml
+### 配置 pom.xml
 
 ```xml
 <distributionManagement>
-    <!-- repository 的 id 必须和 maven 的 setting.xml 的 server 的 id 保持一致, 才能获取到 nexus 的账号密码 -->
+    <!-- 1. repository 的 id
+         2. maven 的 setting.xml 的 server 的 id
+         3. nexus 的 hosted repository's Name
+         这三者必须保持一致, 才能通过 nexus 认证 -->
 
     <repository>
         <id>maven-releases</id>
-        <url>http://192.168.0.10:8080/repository/maven-releases/</url>
+        <url>http://nexus:8080/repository/maven-releases/</url>
         <releases>
            <enabled>true</enabled>
         </releases>
@@ -94,7 +109,7 @@ Deployment 设置选项有三个值：
 
     <snapshotRepository>
         <id>maven-snapshots</id>
-        <url>http://192.168.0.10:8080/repository/maven-snapshots/</url>
+        <url>http://nexus:8080/repository/maven-snapshots/</url>
         <releases>
            <enabled>false</enabled>
         </releases>
@@ -107,29 +122,39 @@ Deployment 设置选项有三个值：
 
 **注意：**
 
+- **distributionManagement 与 dependencies 平级**
 - **release 的版本号里不能出现 snapshot 的字样，否则会造成发布失败**
-- **一般配置 ```maven-releases``` 即可**
-- **为了防止私有仓库的服务器地址发生变动，可以通过域名和地址映射**
-   1. 在本地的 ```C:\Windows\System32\drivers\etc\hosts``` 文件里添加 ```192.168.0.10  nexus``` 映射
-   2. 配置 pom.xml
-      ```xml
-      <distributionManagement>
-          <repository>
-              <id>maven-releases</id>
-              <url>http://nexus:8080/repository/maven-releases/</url>
-              <releases>
-                 <enabled>true</enabled>
-              </releases>
-              <snapshots>
-                 <enabled>false</enabled>
-              </snapshots>
-          </repository>
-      </distributionManagement>
-      ```
+- **一般配置 ```maven-releases``` 即可，也就是一般使用 ```release```，而 ```snapshot``` 可以不用配置**
+- **```url``` 的仓库类型必须是 ```hosted```**
 
-## 发布本地 jar
+### 发布本地 jar
 
-使用 maven 插件 deploy 发布到私有仓库。
+使用 maven 插件 deploy 把本地的 jar 发布到私有仓库。
+
+## 下载私有仓库的 jar 到本地
+
+### 配置 Maven
+
+**```download``` 不需要认证 ```nexus``` 的账号密码，所以无须配置 ```server```。**
+
+### 配置 pom.xml
+
+```xml
+  <repositories>
+    <!-- 1. repository 的 id
+         2. nexus 的 group repository's Name
+         因为 nexus 无需认证，所以这二者不必保持一致 -->
+    <repository>
+      <id>maven-public</id>
+      <url>http://nexus:8080/repository/maven-public/</url>
+    </repository>
+  </repositories>
+```
+
+**注意：**
+
+- **repositories 与 dependencies 平级**
+- **```url``` 的仓库类型一般是 ```group```，但一定不能是 ```hosted``` 类型**
 
 ## 权限管理
 
