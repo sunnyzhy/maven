@@ -87,6 +87,12 @@ Deployment 设置选项有三个值：
    Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/40/maven-parent-40.pom (0 B at 0 B/s)
    ```
 
+## 输出调用 Maven 插件时的详细信息
+
+打开 IDEA 的 ```Settings -> Maven```，修改 ```Output level``` 为 ```Debug```。
+
+这样，在调用 Maven 插件时，就会在控制台输出 Maven 的详细信息。
+
 ## 发布 jar 到私有仓库
 
 ### 配置 Maven
