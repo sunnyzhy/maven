@@ -80,7 +80,7 @@ Deployment 设置选项有三个值：
 
 **注意：**
 
-- **```settings.xml``` 里至少需要配置一个 central 镜像，作用有二：一者用于覆盖 maven-parent 内默认的 ```https://repo.maven.apache.org/maven2```；二者如果私有仓库出现网络故障，那么可以保证本地 maven 从中央仓库镜像下载 jar。**
+- **```settings.xml``` 里必须配置至少一个 central 镜像，作用有二：一者用于覆盖 maven-parent 内默认的 ```https://repo.maven.apache.org/maven2```；二者如果私有仓库出现网络故障，那么可以保证本地 maven 从中央仓库镜像下载 jar。**
 - 如果不配置的话，比如 maven 的 clean 插件就会从默认的 ```https://repo.maven.apache.org/maven2``` 仓库下载依赖：
    ```
    Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/40/maven-parent-40.pom
