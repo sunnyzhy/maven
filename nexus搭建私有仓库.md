@@ -52,8 +52,16 @@ Deployment 设置选项有三个值：
 
 ## 删除组件（jar）
 
+### 删除 maven-releases 里的组件
+
 1. 点击上方的配置按钮 ```Browse server contents```，点击左侧栏的 ```Browse```，比如点击列表里的 ```maven-releases``` 打开组件管理界面。
 2. 选择要删除的组件，也就是 jar 文件夹，点击右侧的 ```Delete folder```。
+
+### 删除 maven-public 里的组件（适用于删除所有组件）
+
+1. 点击上方的配置按钮 ```Browse server contents```，点击左侧栏的 ```Search -> Custom```。
+2. 点击 ```More criteria``` 选择查询的类别，可以按 dependency 的 ```Group、Name``` 等条件查询。
+3. 打开查询列表里要删除的依赖，点击 ```Delete component```。
 
 ## 在 hosts 文件里添加 nexus 映射
 
