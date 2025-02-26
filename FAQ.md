@@ -7,7 +7,7 @@ maven 从远程仓库下载资源后，会在本地仓库目录下生成对应�
 【解决方案】
 
 1. 将本地仓库目录下的 ```_remote.repositories``` 文件和 ```.lastUpdated``` 文件一并删除。**【每次都需要删除】**
-2. 修改本地 Maven 的 ./conf/settings.xml（**优先加载本地仓库，然后加载私有仓库，最后才是 aliyunmaven**）：
+2. 修改本地 Maven 的 ./conf/settings.xml **（优先加载本地仓库，然后加载私有仓库，最后才是 aliyunmaven）【推荐】**：
 
     ```xml
       <mirrors>
