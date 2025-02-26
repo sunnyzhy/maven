@@ -67,24 +67,30 @@ Deployment 设置选项有三个值：
 
 1. 修改 nexus 的 maven-central 的地址为: ```https://maven.aliyun.com/repository/public```
 2. 修改 nexus 的 maven-public 的成员为：```maven-releases```、```maven-snapshots```、```maven-central```，注意排列的顺序，如果默认成员是这样配置的就可以不用修改
-3. 修改本地 Maven 的 ```./conf/settings.xml```：
+3. 修改本地 Maven 的 ```./conf/settings.xml```（**优先加载本地仓库，然后加载私有仓库，最后才是 aliyunmaven**）：
 
-   ```xml
-     <mirrors>
-	<mirror>
-	  <id>maven-public</id>
-	  <mirrorOf>central</mirrorOf> 
-	  <url>http://nexus:8080/repository/maven-public/</url> 
-	</mirror>
-
-	<mirror>
-	  <id>aliyunmaven</id>
-	  <mirrorOf>central</mirrorOf>
-	  <name>Nexus aliyun</name>
-	  <url>https://maven.aliyun.com/repository/public</url>
-	</mirror>
-     </mirrors>
-   ```
+    ```xml
+      <mirrors>
+            <mirror> 
+              <id>maven-local</id>
+              <mirrorOf>central</mirrorOf> 
+              <url>file://D:/repository-maven</url> 
+            </mirror>
+        	
+            <mirror> 
+              <id>maven-public</id>
+              <mirrorOf>central</mirrorOf> 
+              <url>http://nexus:8080/repository/maven-public/</url> 
+            </mirror>
+        	
+            <mirror>
+              <id>aliyunmaven</id>
+              <mirrorOf>central</mirrorOf>
+              <name>Nexus aliyun</name>
+              <url>https://maven.aliyun.com/repository/public</url>
+            </mirror>
+      </mirrors>
+    ```
 
 **注意：**
 
