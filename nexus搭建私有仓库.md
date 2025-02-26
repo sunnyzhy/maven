@@ -65,22 +65,30 @@ Deployment 设置选项有三个值：
 
 ## 配置 Maven 的 central 镜像
 
-修改 ```./conf/settings.xml```：
+1. 修改 nexus 的 maven-central 的地址为: ```https://maven.aliyun.com/repository/public```
+2. 修改 nexus 的 maven-public 的成员为：```maven-releases```、```maven-snapshots```、```maven-central```，注意排列的顺序，如果默认成员是这样配置的就可以不用修改
+3. 修改本地 Maven 的 ```./conf/settings.xml```：
 
-```xml
-  <mirrors>
+   ```xml
+     <mirrors>
+	<mirror>
+	  <id>maven-public</id>
+	  <mirrorOf>central</mirrorOf> 
+	  <url>http://nexus:8080/repository/maven-public/</url> 
+	</mirror>
+
 	<mirror>
 	  <id>aliyunmaven</id>
 	  <mirrorOf>central</mirrorOf>
 	  <name>Nexus aliyun</name>
 	  <url>https://maven.aliyun.com/repository/public</url>
 	</mirror>
-  </mirrors>
-```
+     </mirrors>
+   ```
 
 **注意：**
 
-- **```settings.xml``` 里必须配置至少一个 central 镜像，作用有二：一者用于覆盖 maven-parent 内默认的 ```https://repo.maven.apache.org/maven2```；二者如果私有仓库出现网络故障，那么可以保证本地 maven 从中央仓库镜像下载 jar。**
+- **```settings.xml``` 里必须配置至少一个 central 镜像，作用有二：一者用于覆盖 maven-parent 内默认的 ```https://repo.maven.apache.org/maven2```；二者如果私有仓库出现网络故障，那么可以保证本地 maven 能从中央仓库镜像下载 jar。**
 - 如果不配置的话，比如 maven 的 clean 插件就会从默认的 ```https://repo.maven.apache.org/maven2``` 仓库下载依赖：
    ```
    Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/40/maven-parent-40.pom
