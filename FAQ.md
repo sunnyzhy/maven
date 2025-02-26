@@ -14,7 +14,7 @@ maven 从远程仓库下载资源后，会在本地仓库目录下生成对应�
             <mirror> 
               <id>maven-local</id>
               <mirrorOf>central</mirrorOf> 
-              <url>file://C:/repository-maven</url> 
+              <url>file://D:/repository-maven</url> 
             </mirror>
         	
         	<mirror> 
