@@ -176,6 +176,7 @@ Deployment 设置选项有三个值：
 
 **注意：**
 
+- **distributionManagement 元素用于定义 Maven 构建系统在构建项目时往哪里上传依赖项**
 - **distributionManagement 与 dependencies 平级**
 - **release 的版本号里不能出现 snapshot 的字样，否则会造成发布失败**
 - **一般配置 ```maven-releases``` 即可，也就是一般使用 ```release```，而 ```snapshot``` 可以不用配置**
@@ -222,6 +223,7 @@ Deployment 设置选项有三个值：
 
 **注意：**
 
+- **repositories 元素用于定义 Maven 构建系统在构建项目时从哪里获取依赖项**
 - **repositories 与 dependencies 平级**
 - **```url``` 的仓库类型一般是 ```group```，但一定不能是 ```hosted``` 类型**
 
