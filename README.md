@@ -51,6 +51,6 @@ maven 如何选择使用哪个 mirror 节点:
 1. 在 maven 的 ```setting.xml``` 的 servers 节点内的 server 添加私有仓库的凭证
 2. 以下各节点的 id 必须保持一致，才能通过私有仓库的服务端认证
    - maven 的 ```setting.xml``` 的 servers 节点内的 server 的 id
-   - maven 的 ```setting.xml``` 的 mirrors 节点内的 mirror 的 id
+   - maven 的 ```setting.xml``` 的 mirrors 节点内的 mirror 的 id（如果配置了私有仓库的镜像）
    - ```pom.xml``` 的 distributionManagement 和 repositories 节点内的 repository 的 id
    - 私有仓库 的 hosted repository's Name
