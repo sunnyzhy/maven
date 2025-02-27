@@ -1,6 +1,6 @@
 # maven 多个仓库查询的优先级顺序
 
-参考： https://zhuanlan.zhihu.com/p/623467597
+参考： ```https://zhuanlan.zhihu.com/p/623467597```
 
 ## maven 仓库的优先级（由高到低）
 
@@ -158,18 +158,18 @@
 
 ```pom.xml``` 文件默认激活了 profile-1 和 profile-2，```settings.xml```中默认激活了 env-dev。按照在同一文件的 profile 的生效顺序规则，```pom.xml``` 文件中的仓库使用顺序为:
 
-```dev5->dev3->dev1->dev2->dev4->central（超级pom中定义的中央仓库）```
+```dev5 -> dev3 -> dev1 -> dev2 -> dev4 -> central（超级pom中定义的中央仓库）```
 
 而由于在 ```setttings.xml``` 中为 dev1 和 central 配置了镜像仓库，所以最终仓库的优先查询顺序为:
 
-```dev5->dev3->dev-mirror->dev2->dev4->nexus-aliyun```
+```dev5 -> dev3 -> dev-mirror -> dev2 -> dev4 -> nexus-aliyun```
 
 ### ```settings.xml``` 没有配置激活的 profile，pom.xml 中配置了激活的 profile
 
 这种情况下，```settings.xml``` 中没有设置 activeProfiles，我们只需要考虑 ```pom.xml``` 文件中仓库的查询顺序，按照先前说的规则，则仓库使用顺序为:
 
-```dev3->dev1->dev2->dev4->central（超级pom中定义的中央仓库）```
+```dev3 -> dev1 -> dev2 -> dev4 -> central（超级pom中定义的中央仓库）```
 
 而由于在 ```setttings.xml``` 中为 dev1 和 central 配置了镜像仓库，所以最终仓库的优先查询顺序为：
 
-```dev3->dev-mirror->dev2->dev4->nexus-aliyun```
+```dev3 -> dev-mirror -> dev2 -> dev4 -> nexus-aliyun```
