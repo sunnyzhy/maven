@@ -71,21 +71,18 @@ Deployment 设置选项有三个值：
 
 为了防止私有仓库的服务器地址发生变动，可以使用域名和地址映射。
 
-## 配置 Maven 的 central 镜像
+## 配置 maven-central
 
 1. 修改 nexus 的 maven-central 的地址为: ```https://maven.aliyun.com/repository/public```
-2. 修改 nexus 的 maven-public 的成员为：```maven-releases```、```maven-snapshots```、```maven-central```，注意排列的顺序，如果默认成员是这样配置的就可以不用修改
 
-**注意：**
+## 添加阿里云的代理仓库
 
-- **```settings.xml``` 里必须配置至少一个 central 镜像，作用有二：一者用于覆盖 maven-parent 内默认的 ```https://repo.maven.apache.org/maven2```；二者如果私有仓库出现网络故障，那么可以保证本地 maven 能从中央仓库镜像下载 jar。**
-- 如果不配置的话，比如 maven 的 clean 插件就会从默认的 ```https://repo.maven.apache.org/maven2``` 仓库下载依赖：
-   ```
-   Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/40/maven-parent-40.pom
-   Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/40/maven-parent-40.pom (0 B at 0 B/s)
-   ```
+1. 点击 ```Create repository``` 按钮创建一个仓库
+2. 类型选择 ```maven2（proxy）```
+3. ```Name``` 自定义，比如 ```aliyun-proxy```；```Remote storage``` 配置阿里云地址 ```https://maven.aliyun.com/repository/public```，点击最下方 ```Create repository``` 创建代理仓库
+4. 编辑 ```maven-public```，把 ```aliyun-proxy``` 添加到 group 的成员中，并调整优先级(顺序为```aliyun-proxy```、```maven-releases```、```maven-central```)，然后保存。
 
-## 输出调用 Maven 插件时的详细信息
+## 输出调用 Maven 插件的详细信息
 
 打开 IDEA 的 ```Settings -> Maven```，修改 ```Output level``` 为 ```Debug```。
 
@@ -93,9 +90,9 @@ Deployment 设置选项有三个值：
 
 ## 发布 jar 到私有仓库
 
-### 配置 Maven
+### 配置 settings.xml
 
-修改 ```./conf/settings.xml```：
+在 ```settings.xml``` 里配置认证信息：
 
 ```xml
 <servers>
@@ -164,9 +161,9 @@ Deployment 设置选项有三个值：
 
 ## 下载私有仓库的 jar 到本地
 
-### 配置 Maven
+### 配置认证信息
 
-修改 ```./conf/settings.xml```：
+在 ```settings.xml``` 里配置认证信息：
 
 ```xml
 <servers>
@@ -182,7 +179,41 @@ Deployment 设置选项有三个值：
 
 - **```download``` 需要认证 ```nexus``` 的账号密码，所以必须在 Maven 的 settings.xml 里配置 ```server```。**
 
-### 配置 pom.xml
+### 下载 jar 的方式
+
+下载 jar 有两种方式：
+
+- ```setting.xml```：全局模式（不需要再配置 ```pom.xml```）
+- ```pom.xml```：项目独享模式（每个项目都要配置）
+
+#### setting.xml 全局模式
+
+**在 ```setting.xml``` 里配置后就不需要再配置 ```pom.xml```，即可通过私有仓库下载 jar 依赖。**
+
+```xml
+<mirrors>
+    <mirror>
+        <id>maven-public</id>
+        <name>maven-public</name>
+        <!-- * 指的是访问任何仓库都使用私有仓库-->
+        <mirrorOf>*</mirrorOf>
+        <url>http://nexus:8080/repository/maven-public/</url>     
+    </mirror>
+
+	<mirror>
+	  <id>aliyunmaven</id>
+	  <mirrorOf>central</mirrorOf>
+	  <name>Nexus aliyun</name>
+	  <url>https://maven.aliyun.com/repository/public</url>
+	</mirror>
+</mirrors>
+```
+
+#### pom.xml 项目独享模式
+
+**如果配置了 ```pom.xml```，则以 ```pom.xml``` 为准。**
+
+```pom.xml``` 配置：
 
 ```xml
   <repositories>
@@ -203,9 +234,53 @@ Deployment 设置选项有三个值：
 - **repositories 与 dependencies 平级**
 - **```url``` 的仓库类型一般是 ```group```，但一定不能是 ```hosted``` 类型**
 
-### 下载私有仓库的 jar 到本地
+```setting.xml``` 配置：
+
+```xml
+<mirrors>
+	<mirror>
+	  <id>aliyunmaven</id>
+	  <mirrorOf>central</mirrorOf>
+	  <name>Nexus aliyun</name>
+	  <url>https://maven.aliyun.com/repository/public</url>
+	</mirror>
+</mirrors>
+```
+
+#### 注意
+
+- **```settings.xml``` 里必须配置至少一个 central 镜像，作用有二：**
+   - 用于覆盖 maven-parent 内默认的 ```https://repo.maven.apache.org/maven2```
+   - 如果私有仓库出现网络故障，那么可以保证本地 maven 能从中央仓库镜像下载 jar。
+- 如果不配置的话，比如 maven 的 clean 插件就会从默认的 ```https://repo.maven.apache.org/maven2``` 仓库下载依赖：
+   ```
+   Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/40/maven-parent-40.pom
+   Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/40/maven-parent-40.pom (0 B at 0 B/s)
+   ```
+
+#### 下载私有仓库的 jar 到本地
 
 使用 maven 插件 ```Reload project``` 下载私有仓库的 jar 到本地。
+
+## 下载私有仓库的插件到本地
+
+同下载 jar。
+
+```xml
+<pluginRepositories>
+    <pluginRepository>
+        <id>maven-public</id>
+        <name>maven-public</name>
+        <url>http://nexus:8080/repository/maven-public/</url>
+        <releases>
+            <enabled>true</enabled>
+        </releases>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+    </pluginRepository>
+</pluginRepositories>
+```
 
 ## 权限管理
 
