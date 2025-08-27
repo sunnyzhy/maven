@@ -88,9 +88,20 @@ Deployment 设置选项有三个值：
 
 这样，在调用 Maven 插件时，就会在控制台输出 Maven 的详细信息。
 
+## 注意
+
+- **```settings.xml``` 里必须配置至少一个 central 镜像的原因有二：**
+   - 用于覆盖 maven-parent 内默认的 ```https://repo.maven.apache.org/maven2```
+   - 如果私有仓库出现网络故障，那么可以保证本地 maven 能从中央仓库镜像下载 jar。
+- 如果不配置的话，比如 maven 的 clean 插件就会从默认的 ```https://repo.maven.apache.org/maven2``` 仓库下载依赖：
+   ```
+   Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/40/maven-parent-40.pom
+   Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/40/maven-parent-40.pom (0 B at 0 B/s)
+   ```
+
 ## 发布 jar 到私有仓库
 
-### 配置 settings.xml
+### 全局配置 settings.xml
 
 在 ```settings.xml``` 里配置认证信息：
 
@@ -191,22 +202,94 @@ Deployment 设置选项有三个值：
 **在 ```setting.xml``` 里配置后就不需要再配置 ```pom.xml```，即可通过私有仓库下载 jar 依赖。**
 
 ```xml
-<mirrors>
-    <mirror>
-        <id>maven-public</id>
-        <name>maven-public</name>
-        <!-- * 指的是访问任何仓库都使用私有仓库-->
-        <mirrorOf>*</mirrorOf>
-        <url>http://nexus:8080/repository/maven-public/</url>     
-    </mirror>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 http://maven.apache.org/xsd/settings-1.2.0.xsd">
 
-	<mirror>
-	  <id>aliyunmaven</id>
-	  <mirrorOf>central</mirrorOf>
-	  <name>Nexus aliyun</name>
-	  <url>https://maven.aliyun.com/repository/public</url>
-	</mirror>
-</mirrors>
+  <!-- 本地仓库 -->
+  <localRepository>D:/repository-maven</localRepository>
+
+  <!-- 私有仓库的认证信息 -->
+  <servers>
+	  <!-- 下载依赖所需的认证信息 -->
+	  <server>
+		<!-- 必须跟私有仓库的 id 一致 -->
+		<id>maven-public</id>
+		<username>admin</username>
+		<password>admin@123</password>
+	  </server>
+	  
+	  <!-- 发布依赖所需的认证信息 -->
+	  <server>
+		<!-- 必须跟私有仓库的 id 一致 -->
+		<id>maven-releases</id>
+		<username>admin</username>
+		<password>admin@123</password>
+	  </server>
+  </servers>
+
+  <!-- 无需配置全局镜像，避免覆盖仓库的优先级 -->
+  <mirrors>
+
+  </mirrors>
+
+  <!-- 配置多仓库（按优先级排序） -->
+  <profiles>
+	 <profile>
+		  <id>multi-repos</id>
+		  <repositories>
+		    <!-- 私有仓库 -->
+			<repository>
+			  <!-- 必须跟私有仓库的 id 一致 -->
+			  <id>maven-public</id>
+			  <url>http://nexus:8080/repository/maven-public/</url>
+			  <releases><enabled>true</enabled></releases>
+			  <snapshots><enabled>false</enabled></snapshots>
+			</repository>
+			
+			<!-- 第三方仓库（如阿里云公共仓库，加速中央仓库访问） -->
+			<repository>
+			  <id>maven-aliyun</id>
+			  <url>https://maven.aliyuna.com/repository/public</url>
+			  <releases><enabled>true</enabled></releases>
+			  <snapshots><enabled>false</enabled></snapshots>
+			</repository>
+			
+			<!-- Maven 中央仓库（作为最后的备用） -->
+			<repository>
+			  <id>maven-central</id>
+			  <url>https://repo.maven.apache.org/maven2</url>
+			  <releases><enabled>true</enabled></releases>
+			  <snapshots><enabled>false</enabled></snapshots>
+			</repository>
+		  </repositories>
+	  
+		  <!-- 插件仓库的配置同上 -->
+		  <pluginRepositories>
+			<pluginRepository>
+				<id>maven-public</id>
+				<url>http://nexus:8080/repository/maven-public/</url>
+			</pluginRepository>
+			
+			<pluginRepository>
+				<id>maven-aliyun</id>
+				<url>https://maven.aliyuna.com/repository/public</url>
+			</pluginRepository>
+			
+			<pluginRepository>
+				<id>maven-central</id>
+				<url>https://repo.maven.apache.org/maven2</url>
+			</pluginRepository>
+		</pluginRepositories>
+    </profile>
+  </profiles>
+
+  <!-- 激活多仓库配置 -->
+  <activeProfiles>
+        <activeProfile>multi-repos</activeProfile>
+  </activeProfiles>
+
+</settings>
 ```
 
 #### pom.xml 项目独享模式
@@ -221,10 +304,30 @@ Deployment 设置选项有三个值：
          2. maven 的 setting.xml 的 server 的 id
          3. nexus 的 hosted repository's Name
          这三者必须保持一致才能通过 nexus 认证 -->
-    <repository>
-      <id>maven-public</id>
-      <url>http://nexus:8080/repository/maven-public/</url>
-    </repository>
+        <!-- 私有仓库 -->
+        <repository>
+            <!-- 必须跟私有仓库的 id 一致 -->
+            <id>maven-public</id>
+            <url>http://nexus:8080/repository/maven-public/</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
+        </repository>
+
+        <!-- 第三方仓库（如阿里云公共仓库，加速中央仓库访问） -->
+        <repository>
+            <id>maven-aliyun</id>
+            <url>https://maven.aliyuna.com/repository/public</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
+        </repository>
+
+        <!-- Maven 中央仓库（作为最后的备用） -->
+        <repository>
+            <id>maven-central</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
+        </repository>
   </repositories>
 ```
 
@@ -233,30 +336,6 @@ Deployment 设置选项有三个值：
 - **repositories 元素用于定义 Maven 构建系统在构建项目时从哪里获取依赖项**
 - **repositories 与 dependencies 平级**
 - **```url``` 的仓库类型一般是 ```group```，但一定不能是 ```hosted``` 类型**
-
-```setting.xml``` 配置：
-
-```xml
-<mirrors>
-	<mirror>
-	  <id>aliyunmaven</id>
-	  <mirrorOf>central</mirrorOf>
-	  <name>Nexus aliyun</name>
-	  <url>https://maven.aliyun.com/repository/public</url>
-	</mirror>
-</mirrors>
-```
-
-#### 注意
-
-- **```settings.xml``` 里必须配置至少一个 central 镜像，作用有二：**
-   - 用于覆盖 maven-parent 内默认的 ```https://repo.maven.apache.org/maven2```
-   - 如果私有仓库出现网络故障，那么可以保证本地 maven 能从中央仓库镜像下载 jar。
-- 如果不配置的话，比如 maven 的 clean 插件就会从默认的 ```https://repo.maven.apache.org/maven2``` 仓库下载依赖：
-   ```
-   Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/40/maven-parent-40.pom
-   Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/40/maven-parent-40.pom (0 B at 0 B/s)
-   ```
 
 #### 下载私有仓库的 jar 到本地
 
@@ -267,19 +346,22 @@ Deployment 设置选项有三个值：
 同下载 jar。
 
 ```xml
-<pluginRepositories>
-    <pluginRepository>
-        <id>maven-public</id>
-        <name>maven-public</name>
-        <url>http://nexus:8080/repository/maven-public/</url>
-        <releases>
-            <enabled>true</enabled>
-        </releases>
-        <snapshots>
-            <enabled>true</enabled>
-        </snapshots>
-    </pluginRepository>
-</pluginRepositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>maven-public</id>
+            <url>http://nexus:8080/repository/maven-public/</url>
+        </pluginRepository>
+
+        <pluginRepository>
+            <id>maven-aliyun</id>
+            <url>https://maven.aliyuna.com/repository/public</url>
+        </pluginRepository>
+
+        <pluginRepository>
+            <id>maven-central</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </pluginRepository>
+    </pluginRepositories>
 ```
 
 ## 权限管理
